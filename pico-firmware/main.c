@@ -27,21 +27,20 @@ Mode 0: Automatically get pic folder names and sort them
 Mode 1: Automatically get pic folder names but not sorted
 Mode 2: pic folder name is not automatically obtained, users need to create fileList.txt file and write the picture name in TF card by themselves
 */
-#define Mode 0
+#define Mode 1
 
 #define BUFFER_SIZE 256
-
 char buffer[BUFFER_SIZE];
 
-const char *file_dir = "pic/";
-char file_path[256] = "";
+// const char *pic_dir = "pic/";
+// char file_path[256] = "";
 bool processing_file = false;
 int idle_counter = 0;
 bool done_flag = false;
 
 // Ring buffer size
-#define RING_BUFFER_SIZE 32768
-#define WRITE_BUFFER_SIZE 2048
+#define RING_BUFFER_SIZE 40960 // 32KB
+#define WRITE_BUFFER_SIZE 4096
 uint8_t data[WRITE_BUFFER_SIZE];
 
 #define HEADER_SIZE 260 // 256 bytes for filename + 4 bytes for size
@@ -111,7 +110,7 @@ void write_buffer_to_file(uint8_t *buffer, uint32_t size, bool append) {
 
     // Open file for appending
     FIL fil;
-    FRESULT fr = f_open(&fil, file_path, mode);
+    FRESULT fr = f_open(&fil, received_file_info.file_name, mode);
     if (FR_OK != fr && FR_EXIST != fr) {
         printf("f_open error: %s (%d)\n", FRESULT_str(fr), fr);
         // Handle error
@@ -137,7 +136,7 @@ void write_buffer_to_file(uint8_t *buffer, uint32_t size, bool append) {
 
     run_unmount();
     written_bytes += size;
-    printf("Received %d, Written: %d\n", bytes_received, written_bytes);
+    // printf("Received %d, Written: %d\n", bytes_received, written_bytes);
 }
 
 // Function to handle USB data reception
@@ -169,9 +168,9 @@ bool process_header() {
     memset(received_file_info.file_name, 0, 256);
     memcpy(received_file_info.file_name, header_buffer, 256);
     received_file_info.file_name[255] = '\0'; // Ensure null-termination
-    memset(file_path, 0, 256);
-    strcpy(file_path, file_dir);
-    strcat(file_path, received_file_info.file_name);
+    // memset(file_path, 0, 256);
+    // strcpy(file_path, pic_dir);
+    // strcat(file_path, received_file_info.file_name);
 
     // Extract file size
     received_file_info.file_size = *(uint32_t*)(header_buffer + 256);
@@ -179,12 +178,13 @@ bool process_header() {
     header_received = true;
     memset(header_buffer, 0, HEADER_SIZE);
     header_bytes_received = 0;
-    printf("Received Header - File: %s, Size: %u bytes\n", file_path, received_file_info.file_size);
+    printf("Received Header - File: %s, Size: %u bytes\n", received_file_info.file_name, received_file_info.file_size);
     return true;
 }
 
 // Function to process the received data
 void process_data() {
+    int buffer_counter = 0;
     while (true) {
         uint32_t count = ring_buffer_read(&usb_rx_ring_buffer, data, WRITE_BUFFER_SIZE);
         if (count == 0) {
@@ -194,7 +194,9 @@ void process_data() {
         {
             write_buffer_to_file(data, count, written_bytes > 0);
         }
+        buffer_counter++;
     }
+    printf("Buffer counter: %d\n", buffer_counter);
     if (written_bytes >= received_file_info.file_size) {
         on_receive_complete();
     } else {
@@ -204,7 +206,7 @@ void process_data() {
 
 void on_receive_complete() {
     stopProcessingFile();
-    printf("File received: %s\n", file_path);
+    printf("File received: %s\n", received_file_info.file_name);
     sdScanDir();
     setPathIndexToLast();
     done_flag = true;

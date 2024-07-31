@@ -235,6 +235,95 @@ void ls2file(const char *dir, const char *path) {
     f_closedir(&dj);
 }
 
+#define MAX_FILENAME_LEN 100
+void delete_files_not_in_list(const char *keep_list_file, const char *dir) {
+    FILE *fp;
+    char line[MAX_FILENAME_LEN];
+    char full_path[MAX_FILENAME_LEN + 5];
+
+    // Create a set-like structure using a linked list or hash table for better performance
+    // Here, we'll use a simple array for simplicity
+
+    char keep_list[1000][MAX_FILENAME_LEN]; // Adjust size as needed
+    int keep_list_count = 0;
+
+    // Read keep list file
+    fp = fopen(keep_list_file, "r");
+    if (fp == NULL) {
+        perror("Error opening keep list file");
+        return;
+    }
+
+    while (fgets(line, MAX_FILENAME_LEN, fp) != NULL) {
+        line[strcspn(line, "\r\n")] = 0; // Remove newline
+        strcpy(keep_list[keep_list_count], line);
+        keep_list_count++;
+    }
+    fclose(fp);
+
+    char cwdbuf[FF_LFN_BUF] = {0};
+    FRESULT fr; /* Return value */
+    char const *p_dir;
+    if (dir[0]) {
+        p_dir = dir;
+    } else {
+        fr = f_getcwd(cwdbuf, sizeof cwdbuf);
+        if (FR_OK != fr) {
+            printf("f_getcwd error: %s (%d)\n", FRESULT_str(fr), fr);
+            return;
+        }
+        p_dir = cwdbuf;
+    }
+    printf("Directory Listing: %s\n", p_dir);
+    DIR dj;      /* Directory object */
+    FILINFO fno; /* File information */
+    memset(&dj, 0, sizeof dj);
+    memset(&fno, 0, sizeof fno);
+    fr = f_findfirst(&dj, &fno, p_dir, "*");
+    if (FR_OK != fr) {
+        printf("f_findfirst error: %s (%d)\n", FRESULT_str(fr), fr);
+        return;
+    }
+    while (fr == FR_OK && fno.fname[0]) { /* Repeat while an item is found */
+        /* Create a string that includes the file name, the file size and the
+         attributes string. */
+        const char *pcWritableFile = "writable file",
+                   *pcReadOnlyFile = "read only file",
+                   *pcDirectory = "directory";
+        const char *pcAttrib;
+        /* Point pcAttrib to a string that describes the file. */
+        if (fno.fattrib & AM_DIR) {
+            pcAttrib = pcDirectory;
+        } else if (fno.fattrib & AM_RDO) {
+            pcAttrib = pcReadOnlyFile;
+        } else {
+            pcAttrib = pcWritableFile;
+        }
+        /* Create a string that includes the file name, the file size and the
+         attributes string. */
+        int found = 0;
+        for (int i = 0; i < keep_list_count; i++) {
+            if (strcmp(fno.fname, keep_list[i]) == 0) {
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            printf("Deleting %s [%s] [size=%llu]\n", fno.fname, pcAttrib, fno.fsize);
+            snprintf(full_path, sizeof(full_path), "%s/%s", dir, fno.fname);
+            if (f_unlink(full_path) != 0) {
+                perror("Error deleting file");
+            }
+        }
+
+        fr = f_findnext(&dj, &fno); /* Search for next item */
+    }
+    f_closedir(&dj);
+
+    return;
+}
+
 /* 
     function: 
         TF card and file system initialization and testing

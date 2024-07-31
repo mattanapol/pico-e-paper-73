@@ -35,7 +35,7 @@ def job():
     leave_events = list(map(map_event, leave_events))
     file_path = calendar_image_creator.create_calendar_image(events, leave_events)
     sending_file = convert.convert(file_path)
-    pico_util.send_file_to_pico('/dev/tty.usbmodem1101', sending_file)
+    pico_util.send_file_to_pico('/dev/tty.usbmodem1101', sending_file, "pic/")
 
 job()
 schedule.every(1).hours.do(job)  

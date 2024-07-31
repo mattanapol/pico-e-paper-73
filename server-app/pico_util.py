@@ -3,7 +3,7 @@ import time
 import struct
 import os
 
-def send_file_to_pico(serial_port, file_path):
+def send_file_to_pico(serial_port, file_path, pico_save_file_path = ""):
     with serial.Serial(serial_port, 115200, timeout=1) as ser:
         time.sleep(2)  # wait for the Pico to initialize
 
@@ -16,6 +16,10 @@ def send_file_to_pico(serial_port, file_path):
                 # Ensure the file name fits into 256 bytes
                 if len(file_name) > 100:
                     raise ValueError("File name is too long. It must be 100 characters or less.")
+                
+                # path combine
+                if pico_save_file_path:
+                    file_name = os.path.join(pico_save_file_path, file_name)
 
                 # Create the header
                 header = struct.pack('256sI', file_name.encode('utf-8'), file_size)
@@ -35,7 +39,7 @@ def send_file_to_pico(serial_port, file_path):
                     if new_progress > progress:
                         progress = new_progress
                         print(f"Progress: {progress}%", end="\r")
-                    time.sleep(0.025)
+                    time.sleep(0.020)
                 print("File sent successfully.")
         except FileNotFoundError:
             print("\nFile not found.")
