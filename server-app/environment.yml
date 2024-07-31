@@ -1,0 +1,8 @@
+name: pico-e-paper
+
+dependencies:
+  - python>=3.12
+  - anaconda
+  - pip
+  - pip:
+    - -r requirements.txt

@@ -1,0 +1,7 @@
+# output files
+/*.png
+/*.bmp
+
+# google api credentials
+credentials.json
+token.pickle
