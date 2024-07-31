@@ -2,9 +2,11 @@
 
 ## Firmware for Raspberry pi Pico
 This based on original example firmware provided by Waveshare.
-But this modified version include logic that support file streaming from USB device and store it to TF card mounted to the board.
+But this modified version include logic that support file streaming from USB device and store it to TF card mounted to the board. (tested on Macbook M1, GCC 14.1.0 arm-none-eabi, pico-sdk)
 
 Ref: https://www.waveshare.com/wiki/PhotoPainter
+
+Pico-sdk: https://github.com/raspberrypi/pico-sdk
 
 
 
