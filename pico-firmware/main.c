@@ -169,9 +169,6 @@ bool process_header() {
     memset(received_file_info.file_name, 0, 256);
     memcpy(received_file_info.file_name, header_buffer, 256);
     received_file_info.file_name[255] = '\0'; // Ensure null-termination
-    // memset(file_path, 0, 256);
-    // strcpy(file_path, pic_dir);
-    // strcat(file_path, received_file_info.file_name);
 
     // Extract file size
     received_file_info.file_size = *(uint32_t*)(header_buffer + 256);

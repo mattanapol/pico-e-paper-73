@@ -242,9 +242,6 @@ void delete_files_not_in_list(const char *keep_list_file, const char *dir) {
     char line[MAX_FILENAME_LEN];
     char full_path[MAX_FILENAME_LEN + 5];
 
-    // Create a set-like structure using a linked list or hash table for better performance
-    // Here, we'll use a simple array for simplicity
-
     char keep_list[1000][MAX_FILENAME_LEN]; // Adjust size as needed
     int keep_list_count = 0;
 
