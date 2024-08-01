@@ -237,7 +237,8 @@ void ls2file(const char *dir, const char *path) {
 
 #define MAX_FILENAME_LEN 100
 void delete_files_not_in_list(const char *keep_list_file, const char *dir) {
-    FILE *fp;
+    run_mount();
+
     char line[MAX_FILENAME_LEN];
     char full_path[MAX_FILENAME_LEN + 5];
 
@@ -247,22 +248,24 @@ void delete_files_not_in_list(const char *keep_list_file, const char *dir) {
     char keep_list[1000][MAX_FILENAME_LEN]; // Adjust size as needed
     int keep_list_count = 0;
 
-    // Read keep list file
-    fp = fopen(keep_list_file, "r");
-    if (fp == NULL) {
-        perror("Error opening keep list file");
+    FRESULT fr; /* Return value */
+    FIL fil;
+
+    fr =  f_open(&fil, keep_list_file, FA_READ);
+    if(FR_OK != fr && FR_EXIST != fr) {
+        printf("Error opening keep list file\r\n");
         return;
     }
 
-    while (fgets(line, MAX_FILENAME_LEN, fp) != NULL) {
-        line[strcspn(line, "\r\n")] = 0; // Remove newline
+    // printf("ls array path\r\n");
+    while(f_gets(line, MAX_FILENAME_LEN, &fil) != NULL) {
         strcpy(keep_list[keep_list_count], line);
         keep_list_count++;
     }
-    fclose(fp);
+
+    f_close(&fil);
 
     char cwdbuf[FF_LFN_BUF] = {0};
-    FRESULT fr; /* Return value */
     char const *p_dir;
     if (dir[0]) {
         p_dir = dir;
@@ -320,8 +323,7 @@ void delete_files_not_in_list(const char *keep_list_file, const char *dir) {
         fr = f_findnext(&dj, &fno); /* Search for next item */
     }
     f_closedir(&dj);
-
-    return;
+    run_unmount();
 }
 
 /* 
@@ -401,7 +403,7 @@ void sdScanDir(void)
 {   
     run_mount();
 
-    ls2file("0:/pic", fileList);
+    ls2file(picDir, fileList);
     printf("ls %s\r\n", fileList);
     run_cat(fileList);
 

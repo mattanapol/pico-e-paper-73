@@ -72,7 +72,7 @@ def convert(input_filename,
     quantized_image = resized_image.quantize(dither=display_dither, palette=pal_image).convert('RGB')
 
     # Save output image
-    time_str = time.strftime('%Y%m%d%H%M%S%f', time.localtime())
+    time_str = time.strftime('%Y%m%d%H%M%S', time.localtime())
     # output_filename = os.path.splitext(input_filename)[0] + '_' + display_mode + '_output.bmp'
     output_filename = f'{time_str}.bmp'
     quantized_image.save(output_filename)

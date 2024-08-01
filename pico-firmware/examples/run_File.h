@@ -22,6 +22,8 @@ void setFilePath(void);
 void updatePathIndex(void);
 void file_sort();
 
+#define picDir "0:/pic"
 void setPathIndexToLast(void);
+void delete_files_not_in_list(const char *keep_list_file, const char *dir);
 
 #endif

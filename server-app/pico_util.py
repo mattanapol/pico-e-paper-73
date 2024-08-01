@@ -39,7 +39,7 @@ def send_file_to_pico(serial_port, file_path, pico_save_file_path = ""):
                     if new_progress > progress:
                         progress = new_progress
                         print(f"Progress: {progress}%", end="\r")
-                    time.sleep(0.020)
+                    time.sleep(0.025)
                 print("File sent successfully.")
         except FileNotFoundError:
             print("\nFile not found.")

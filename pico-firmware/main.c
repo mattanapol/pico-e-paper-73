@@ -10,6 +10,7 @@
 
 #include "pico/stdlib.h"
 #include "tusb.h"
+#include "utils.h"
 
 extern const char *fileList;
 extern char pathName[];
@@ -39,7 +40,7 @@ int idle_counter = 0;
 bool done_flag = false;
 
 // Ring buffer size
-#define RING_BUFFER_SIZE 40960 // 32KB
+#define RING_BUFFER_SIZE 40960 // 40KB
 #define WRITE_BUFFER_SIZE 4096
 uint8_t data[WRITE_BUFFER_SIZE];
 
@@ -207,8 +208,16 @@ void process_data() {
 void on_receive_complete() {
     stopProcessingFile();
     printf("File received: %s\n", received_file_info.file_name);
-    sdScanDir();
-    setPathIndexToLast();
+    if (is_str_end_with(received_file_info.file_name, ".bmp")) {
+        sdScanDir();
+        setPathIndexToLast();
+    }
+    else if (is_str_end_with(received_file_info.file_name, "keepList.txt")) {
+        delete_files_not_in_list(received_file_info.file_name, picDir);
+        sdScanDir();
+        setPathIndexToLast();
+    }
+
     done_flag = true;
 }
 
@@ -357,14 +366,7 @@ int main(void)
             }
             last_bytes_received = bytes_received;
 
-            #if enChargingRtc
-            if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
-                printf("rtc interrupt\r\n");
-                run_display(Time, alarmTime, isCard);
-            }
-            #endif
-
-            if(!DEV_Digital_Read(BAT_STATE) || done_flag) {  // KEY pressed
+            if(!DEV_Digital_Read(BAT_STATE) || (done_flag && !processing_file)) {  // KEY pressed
                 printf("key interrupt\r\n");
                 run_display(Time, alarmTime, isCard);
                 done_flag = false;
