@@ -12,11 +12,14 @@ SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 OB_LEAVE_CALENDAR_ID = 'c_a491d065cb2259ea0375b641f8689a69c0996f452a260d8d6095412652b74c19@group.calendar.google.com'
 OMS_LEAVE_CALENDAR_ID = 'c_63d754b515ff1daee2f6024ace3f2b4a6a2e7e62cea125e879d8c2ec4b43b1bb@group.calendar.google.com'
 PROMOTION_LEAVE_CALENDAR_ID = 'c_b3e01aa8d458ebdf3dc424dca9ad353ec9c898f06bb394c479113bf593da8252@group.calendar.google.com'
-  
+
+TOKEN_PATH = 'config/token.pickle'
+CREDENTIAL_PATH = 'config/credentials.json'
+
 def authenticate_google_calendar():
     creds = None
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    if os.path.exists(TOKEN_PATH):
+        with open(TOKEN_PATH, 'rb') as token:
             creds = pickle.load(token)
 
     if not creds or not creds.valid:
@@ -28,16 +31,15 @@ def authenticate_google_calendar():
                 creds = None
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                CREDENTIAL_PATH, SCOPES)
             flow.redirect_uri = 'http://localhost'
             creds = flow.run_local_server()
-        with open('token.pickle', 'wb') as token:
+        with open(TOKEN_PATH, 'wb') as token:
             pickle.dump(creds, token)
     return creds
   
 def fetch_calendar_entries(start_date, end_date, calendar_id='primary'):
     creds = authenticate_google_calendar()
-    print("Authenticated")
     service = build('calendar', 'v3', credentials=creds)
   
     events_result = service.events().list(calendarId=calendar_id, timeMin=start_date, timeMax=end_date,
@@ -67,7 +69,6 @@ def get_self_response_status(event):
 
 def fetch_calendar_list():
     creds = authenticate_google_calendar()
-    print("Authenticated")
     service = build('calendar', 'v3', credentials=creds)
   
     page_token = None
@@ -79,9 +80,9 @@ def fetch_calendar_list():
         if not page_token:
             break
 
-def fetch_event():  
-    # Define your start and end date here  
+def fetch_event():
     start_date = datetime.datetime.now(datetime.timezone.utc).astimezone()
+    # start_date = datetime.datetime.fromisoformat('2024-08-01T00:00:00+07:00')
     end_date = start_date + datetime.timedelta(days=1)
     primary_entries = fetch_calendar_entries(start_date.isoformat(), end_date.isoformat())
     ob_leave_entries = fetch_calendar_entries(start_date.isoformat(), end_date.isoformat(), OB_LEAVE_CALENDAR_ID)

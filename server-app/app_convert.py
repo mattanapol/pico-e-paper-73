@@ -20,4 +20,4 @@ display_direction = args.dir
 display_mode = args.mode
 display_dither = Image.Dither(args.dither)
 
-convert(input_filename, display_direction, display_mode, display_dither)
+convert.convert(input_filename, display_direction, display_mode, display_dither)

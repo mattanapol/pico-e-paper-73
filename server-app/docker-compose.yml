@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  iot-server:
+    image: mattanapol/kaewsai-iot-server:latest
+    build: .
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ./config:/app/config
