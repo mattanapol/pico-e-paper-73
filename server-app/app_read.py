@@ -17,7 +17,8 @@ def read_serial_port(port, baudrate):
 if __name__ == "__main__":
     import os  # Import for os.path.getsize
 
-    # read_serial_port('/dev/tty.usbmodem1101', 115200)
-    read_serial_port('/dev/cu.usbmodem58760914231', 115200)
+    read_serial_port('/dev/tty.usbmodem1101', 115200)
+    # read_serial_port('/dev/cu.usbmodem58760914231', 115200)
     # read_serial_port('/dev/tty.usbserial-A5069RR4', 115200)
     # read_serial_port('/dev/cu.usbmodem595B0062961', 115200)
+    # read_serial_port('/dev/cu.usbmodem1234561', 115200)

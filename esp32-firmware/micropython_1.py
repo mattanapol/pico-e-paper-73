@@ -4,7 +4,7 @@ import time
 from machine import UART, Pin, deepsleep
 
 DOWNLOADED_FILE_LIST = "/downloaded_files.txt"
-UART_SEND_SLEEP_IN_SECONDS = 0.03
+UART_SEND_SLEEP_IN_SECONDS = 0.05
 CHUNK_SIZE = 1024
 DEEP_SLEEP_IN_SECONDS = 20
 
@@ -117,6 +117,7 @@ def load_downloaded_files():
 def init_uart():
     uart_tx = Pin(18, Pin.OUT)
     uart_rx = Pin(9, Pin.IN)
+    # rts_pin = Pin(19, Pin.OUT)
     uart = UART(1, baudrate=115200, tx=uart_tx, rx=uart_rx, timeout=1000, bits=8, parity=None, stop=1)
     return uart
 
@@ -146,3 +147,4 @@ for file in missing_files:
 
 print(f"All files downloaded successfully, going to deep sleep for {DEEP_SLEEP_IN_SECONDS} seconds.")
 deepsleep(DEEP_SLEEP_IN_SECONDS * 1000)
+

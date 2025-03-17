@@ -27,7 +27,7 @@ main.c
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(epd 1)
-pico_enable_stdio_uart(epd 0)
+pico_enable_stdio_uart(epd 1)
 
 # create map/bin/hex/uf2 file etc.
 pico_add_extra_outputs(epd)

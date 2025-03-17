@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "string.h": "c"
+        "*.sqlbook": "sql",
+        "*.ndjson": "jsonl",
+        "*.dbclient-js": "javascript",
+        "string.h": "c",
+        "algorithm": "c",
+        "stdio_uart.h": "c"
     }
 }
